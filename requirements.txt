@@ -1,4 +1,6 @@
 pandas
 sqlalchemy
 faker
-kafka-python
+matplotlib
+seaborn
+numpy
