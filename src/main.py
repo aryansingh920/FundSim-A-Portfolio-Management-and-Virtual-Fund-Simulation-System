@@ -106,7 +106,7 @@ def start_consumers():
 
 
 def main():
-    # create_assets()
+    create_assets()
     kafka_produce()
     print("Waiting for messages...")
     time.sleep(10)

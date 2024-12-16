@@ -14,9 +14,13 @@ class AssetConsumer:
         self.asset_type = asset_type
 
     def consume(self):
-        print(f"Listening for messages on topic '{self.consumer.topics()}'.")
+        print(
+            f"Listening for messages on topic '{self.consumer.subscription()}'.")
         for message in self.consumer:
             print(f"Consumed message: {message.value}")
+            print(
+                f"Metadata: Topic={message.topic}, Partition={message.partition}, Offset={message.offset}")
             data = [message.value]  # Wrap the message in a list
             df = pd.DataFrame(data)
             store_assets_in_db(df, self.asset_type)
+            print(f"Stored data in {self.asset_type}.db successfully.")
