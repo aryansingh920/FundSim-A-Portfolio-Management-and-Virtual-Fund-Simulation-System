@@ -99,6 +99,7 @@ def display_stock_info():
     else:
         messagebox.showinfo("No Results", f"No data found for ticker symbol '{ticker}'.")
 
+# def main():
 # Initialize the main window
 root = tk.Tk()
 root.title("Stock Information Viewer")
@@ -117,5 +118,7 @@ search_button.pack(side="left")
 info_frame = tk.Frame(root)
 info_frame.pack(pady=10, fill="both", expand=True)
 
-# Start the Tkinter event loop
-root.mainloop()
+
+def main():
+    # Start the Tkinter event loop
+    root.mainloop()
