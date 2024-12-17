@@ -32,7 +32,7 @@ generated_tickers = set()
 def generate_unique_ticker():
     while True:
         # Generate a random length between 3 and 5
-        length = random.randint(3, 5)
+        length = random.randint(3, 6)
         # Generate a random ticker of the given length
         ticker = ''.join(random.choices(string.ascii_uppercase, k=length))
         # Check if the ticker is unique
