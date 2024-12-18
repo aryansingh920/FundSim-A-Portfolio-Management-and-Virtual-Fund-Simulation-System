@@ -18,18 +18,36 @@ def plot_candlestick_chart(ticker: str):
         print(f"No historical data found for ticker {ticker}.")
         return
 
-    # Extract the price data into lists for Plotly
+    # Extract all columns dynamically
     dates = [r.date for r in records]
     open_prices = [float(r.open_price) for r in records]
     high_prices = [float(r.day_high) for r in records]
     low_prices = [float(r.day_low) for r in records]
     close_prices = [float(r.close_price) for r in records]
 
-    # Create a custom hovertext for each data point
-    hover_text = [
-        f"Date: {d}<br>Open: {o}<br>High: {h}<br>Low: {l}<br>Close: {c}"
-        for d, o, h, l, c in zip(dates, open_prices, high_prices, low_prices, close_prices)
-    ]
+    # Get all attributes dynamically
+    extra_fields = [col for col in HistoricalData.__table__.columns.keys(
+    ) if col not in ['date', 'open_price', 'day_high', 'day_low', 'close_price', 'ticker']]
+
+    # Prepare custom hover text dynamically for all fields
+    hover_text = []
+    for record in records:
+        hover_items = [
+            f"Date: {record.date}",
+            f"Open: {record.open_price}",
+            f"High: {record.day_high}",
+            f"Low: {record.day_low}",
+            f"Close: {record.close_price}"
+        ]
+        # Add all extra fields dynamically
+        for field in extra_fields:
+            # Fetch attribute or fallback to "N/A"
+            if field == "id" or field == "ticker" or field == "historical_data_start_date" or field == "historical_data_end_date":
+                continue
+            value = getattr(record, field, "N/A")
+            hover_items.append(f"{field.replace('_', ' ').title()}: {value}")
+
+        hover_text.append("<br>".join(hover_items))
 
     # Create the candlestick figure
     fig = go.Figure(data=[go.Candlestick(
@@ -40,7 +58,7 @@ def plot_candlestick_chart(ticker: str):
         close=close_prices,
         name=ticker,
         hoverinfo='text',     # Enable text-based hover
-        hovertext=hover_text  # Supply the custom hover text
+        hovertext=hover_text  # Supply the dynamic hover text
     )])
 
     # Update layout to add title and better formatting
@@ -75,4 +93,4 @@ def plot_candlestick_chart(ticker: str):
 
 if __name__ == "__main__":
     # Example usage: plot candlestick for a given ticker
-    plot_candlestick_chart("KARMMF")
+    plot_candlestick_chart("BGINTF")

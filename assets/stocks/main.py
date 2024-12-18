@@ -166,8 +166,8 @@ def main():
     ticker = stock.ticker
     start_price = float(price_info.close_price)
     shares_outstanding = stock.shares_outstanding
-    start_date = datetime(2010, 1, 1)  # Hardcoded start date
-    days = 365*14  # Hardcoded number of days
+    start_date = datetime(2020, 1, 1)  # Hardcoded start date
+    days = 365*1  # Hardcoded number of days
     initial_eps = float(
         fundamentals.earnings_per_share) if fundamentals.earnings_per_share else 10.0
     annual_dividend = float(

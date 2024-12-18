@@ -2,3 +2,6 @@
 data
 
 .vscode
+
+assets/stocks/__pycache__
+assets/stocks/model/__pycache__

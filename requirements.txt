@@ -6,3 +6,4 @@ seaborn
 numpy
 tk
 plotly
+dash
