@@ -122,3 +122,7 @@ info_frame.pack(pady=10, fill="both", expand=True)
 def main():
     # Start the Tkinter event loop
     root.mainloop()
+
+
+if __name__ == "__main__":
+    main()

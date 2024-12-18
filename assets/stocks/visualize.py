@@ -60,6 +60,9 @@ def plot_candlestick_chart(ticker: str):
                 dict(count=1, label="1M", step="month", stepmode="backward"),
                 dict(count=6, label="6M", step="month", stepmode="backward"),
                 dict(count=1, label="1Y", step="year", stepmode="backward"),
+                dict(count=2, label="2Y", step="year", stepmode="backward"),
+                dict(count=5, label="5Y", step="year", stepmode="backward"),
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
                 dict(label="All", step="all")
             ])
         ),
@@ -72,4 +75,4 @@ def plot_candlestick_chart(ticker: str):
 
 if __name__ == "__main__":
     # Example usage: plot candlestick for a given ticker
-    plot_candlestick_chart("FJM")
+    plot_candlestick_chart("XTK")
