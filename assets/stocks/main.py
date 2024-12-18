@@ -182,5 +182,5 @@ def main():
 
 
 if __name__ == "__main__":
-    for _ in range(1):
+    for _ in range(50):
         main()  # Call the main function when the script is run directly
