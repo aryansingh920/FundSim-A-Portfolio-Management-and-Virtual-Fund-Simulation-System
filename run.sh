@@ -8,3 +8,6 @@ kcat -b 127.0.0.1:9092 -t assets -o beginning
 
 docker-compose down
 docker-compose up -d
+
+
+uvicorn main:app --reload --port 1234

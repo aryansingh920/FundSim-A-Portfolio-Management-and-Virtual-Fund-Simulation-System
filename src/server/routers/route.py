@@ -8,42 +8,6 @@ from server.controller.generate_stock import stock_data_controller
 router = APIRouter()
 
 
-@router.get("/candlestick/{ticker}", summary="Get Candlestick Chart")
-def candlestick_chart(
-    ticker: str = Path(..., description="The stock ticker symbol")
-):
-    """
-    Fetch the candlestick chart for the given ticker.
-
-    Args:
-        ticker (str): The stock ticker symbol.
-
-    Returns:
-        HTML of the candlestick chart or an error message.
-    """
-    return get_candlestick_chart(ticker)
-
-
-@router.get("/subplot/{ticker}/{start_date}/{end_date}", summary="Get Subplot Chart")
-def subplot_chart(
-    ticker: str = Path(..., description="The stock ticker symbol"),
-    start_date: str = Path(..., description="Start date in YYYY-MM-DD format"),
-    end_date: str = Path(..., description="End date in YYYY-MM-DD format")
-):
-    """
-    Fetch the subplot chart for the given ticker and date range.
-
-    Args:
-        ticker (str): The stock ticker symbol.
-        start_date (str): The start date for the data range.
-        end_date (str): The end date for the data range.
-
-    Returns:
-        HTML of the subplot chart or an error message.
-    """
-    return get_subplot_chart(ticker, start_date, end_date)
-
-
 @router.get('/generate_stocks', summary="Generate Stock Data", response_model=Dict[str, Any])
 def generate_stocks(
     number_of_stocks: int = Query(
@@ -82,3 +46,39 @@ def generate_stocks(
         start_date=parsed_start_date,
         days=days
     )
+
+
+@router.get("/candlestick/{ticker}", summary="Get Candlestick Chart")
+def candlestick_chart(
+    ticker: str = Path(..., description="The stock ticker symbol")
+):
+    """
+    Fetch the candlestick chart for the given ticker.
+
+    Args:
+        ticker (str): The stock ticker symbol.
+
+    Returns:
+        HTML of the candlestick chart or an error message.
+    """
+    return get_candlestick_chart(ticker)
+
+
+@router.get("/subplot/{ticker}/{start_date}/{end_date}", summary="Get Subplot Chart")
+def subplot_chart(
+    ticker: str = Path(..., description="The stock ticker symbol"),
+    start_date: str = Path(..., description="Start date in YYYY-MM-DD format"),
+    end_date: str = Path(..., description="End date in YYYY-MM-DD format")
+):
+    """
+    Fetch the subplot chart for the given ticker and date range.
+
+    Args:
+        ticker (str): The stock ticker symbol.
+        start_date (str): The start date for the data range.
+        end_date (str): The end date for the data range.
+
+    Returns:
+        HTML of the subplot chart or an error message.
+    """
+    return get_subplot_chart(ticker, start_date, end_date)
