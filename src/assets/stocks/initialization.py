@@ -4,7 +4,7 @@ import string
 from typing import Tuple, Set
 
 from faker import Faker
-from model.model import (
+from model import (
     Stock,
     PriceTradingInfo,
     FundamentalMetrics,

@@ -2,7 +2,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from model.model import HistoricalData
+from model import HistoricalData
 import pandas as pd
 
 

@@ -7,3 +7,5 @@ numpy
 tk
 plotly
 dash
+fastapi[all]
+hypercorn

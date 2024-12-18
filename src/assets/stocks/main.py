@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from model.model import Base, Stock, PriceTradingInfo, FundamentalMetrics, VolatilityRisk, MarketIndicators, HistoricalData
+from model import Base, Stock, PriceTradingInfo, FundamentalMetrics, VolatilityRisk, MarketIndicators, HistoricalData
 from historical_data import generate_historical_data
 from save_to_db import setup_database, clear_database, save_random_stock_data
 from initialization import generate_random_stock_data

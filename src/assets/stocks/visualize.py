@@ -1,10 +1,10 @@
 import plotly.graph_objects as go
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from model.model import HistoricalData, Base
+from assets.stocks.model import HistoricalData, Base
 
 
-def plot_candlestick_chart(ticker: str):
+def generate_candlestick_chart(ticker: str):
     # Connect to the database
     engine = create_engine('sqlite:///data/stocks.db', echo=False)
     Session = sessionmaker(bind=engine)
@@ -40,12 +40,12 @@ def plot_candlestick_chart(ticker: str):
             f"Close: {record.close_price}"
         ]
         # Add all extra fields dynamically
-        for field in extra_fields:
-            # Fetch attribute or fallback to "N/A"
-            if field == "id" or field == "ticker" or field == "historical_data_start_date" or field == "historical_data_end_date":
-                continue
-            value = getattr(record, field, "N/A")
-            hover_items.append(f"{field.replace('_', ' ').title()}: {value}")
+        # for field in extra_fields:
+        #     # Fetch attribute or fallback to "N/A"
+        #     if field == "id" or field == "ticker" or field == "historical_data_start_date" or field == "historical_data_end_date":
+        #         continue
+        #     value = getattr(record, field, "N/A")
+        #     hover_items.append(f"{field.replace('_', ' ').title()}: {value}")
 
         hover_text.append("<br>".join(hover_items))
 
@@ -93,4 +93,4 @@ def plot_candlestick_chart(ticker: str):
 
 if __name__ == "__main__":
     # Example usage: plot candlestick for a given ticker
-    plot_candlestick_chart("BGINTF")
+    generate_candlestick_chart("BGINTF")

@@ -1,13 +1,15 @@
 from sqlalchemy import create_engine
-from model.model import Base, Stock, PriceTradingInfo, FundamentalMetrics, VolatilityRisk, MarketIndicators
+from model import Base, Stock, PriceTradingInfo, FundamentalMetrics, VolatilityRisk, MarketIndicators
 
 DATABASE_FILE = "data/stocks.db"
+
 
 def setup_database():
     # Create a database connection
     engine = create_engine(f"sqlite:///{DATABASE_FILE}")
     Base.metadata.create_all(engine)  # Create tables based on models
     return engine
+
 
 def clear_database(session):
     # Delete all records from all tables
@@ -18,6 +20,7 @@ def clear_database(session):
     session.query(Stock).delete()
     session.commit()
     print("All existing records have been deleted.")
+
 
 def save_random_stock_data(session, stock_data):
     # Unpack the generated stock data
@@ -43,5 +46,3 @@ def save_random_stock_data(session, stock_data):
     # Commit all objects
     session.commit()
     print(f"Stock '{stock.ticker}' and related data successfully added.")
-
-
