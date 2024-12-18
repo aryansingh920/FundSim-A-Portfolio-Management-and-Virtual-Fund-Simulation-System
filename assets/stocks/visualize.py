@@ -75,4 +75,4 @@ def plot_candlestick_chart(ticker: str):
 
 if __name__ == "__main__":
     # Example usage: plot candlestick for a given ticker
-    plot_candlestick_chart("XTK")
+    plot_candlestick_chart("KARMMF")
