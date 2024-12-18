@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from model import Base, Stock, PriceTradingInfo, FundamentalMetrics, VolatilityRisk, MarketIndicators
+from assets.stocks.model import Base, Stock, PriceTradingInfo, FundamentalMetrics, VolatilityRisk, MarketIndicators
 
 DATABASE_FILE = "data/stocks.db"
 

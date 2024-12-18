@@ -4,14 +4,14 @@ import string
 from typing import Tuple, Set
 
 from faker import Faker
-from model import (
+from assets.stocks.model import (
     Stock,
     PriceTradingInfo,
     FundamentalMetrics,
     VolatilityRisk,
     MarketIndicators
 )
-from constants import SECTORS
+from assets.stocks.constants import SECTORS
 
 
 class StockDataInitializer:
