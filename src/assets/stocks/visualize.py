@@ -1,9 +1,8 @@
 import plotly.graph_objects as go
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime, timedelta
-
-from assets.stocks.model import HistoricalData, IntradayData, Base
+from datetime import timedelta
+from assets.stocks.model import HistoricalData, IntradayData
 
 
 def generate_candlestick_chart(ticker: str):
@@ -13,10 +12,8 @@ def generate_candlestick_chart(ticker: str):
     session = Session()
 
     # 1) Query all daily data
-    daily_records = (session.query(HistoricalData)
-                     .filter_by(ticker=ticker)
-                     .order_by(HistoricalData.date.asc())
-                     .all())
+    daily_records = session.query(HistoricalData).filter_by(
+        ticker=ticker).order_by(HistoricalData.date.asc()).all()
 
     if not daily_records:
         print(f"No historical data found for ticker {ticker}.")
@@ -29,48 +26,33 @@ def generate_candlestick_chart(ticker: str):
     daily_low = [float(rec.day_low) for rec in daily_records]
     daily_close = [float(rec.close_price) for rec in daily_records]
 
-    # 2) Identify last day from daily data
+    # 2) Identify the last day and query intraday data
     last_date = max(daily_dates)
+    intraday_records = session.query(IntradayData).filter_by(
+        ticker=ticker, date=last_date).order_by(IntradayData.timestamp.asc()).all()
 
-    # 3) Query intraday data for that last day
-    intraday_records = (session.query(IntradayData)
-                        .filter_by(ticker=ticker)
-                        .filter(IntradayData.date == last_date)
-                        .order_by(IntradayData.timestamp.asc())
-                        .all())
-
-    # Extract intraday data if available
+    # Extract intraday data
     intraday_timestamps = []
-    intraday_open = []
-    intraday_high = []
-    intraday_low = []
-    intraday_close = []
+    intraday_prices = []
 
     if intraday_records:
-        # For candlesticks, we typically group intraday data by (time intervals)
-        # If you have each minute (or each record individually):
-        #   - you either plot them as a single "line" or
-        #   - you aggregate them into intervals (e.g. 15-min, 30-min candles)
-        # For simplicity, let's pretend each row is already the needed interval:
         intraday_timestamps = [row.timestamp for row in intraday_records]
-        # If your table does not store open/high/low/close for intraday,
-        #   you can replicate them from `row.price` or some aggregator function.
-        # Let's assume we only have `row.price` in IntradayData for simplicity:
-        # In that case, a candlestick might not make sense unless you’re
-        # computing open/high/low/close per interval.
-        # So let's do a *line chart* for intraday to keep it simpler.
+        intraday_prices = [float(row.price) for row in intraday_records]
 
-        # However, to show you how to do a candlestick, we’ll *pretend*
-        # we have O/H/L/C columns. If not, adapt accordingly.
-        intraday_open = [float(row.price) for row in intraday_records]
-        intraday_high = [float(row.price) for row in intraday_records]
-        intraday_low = [float(row.price) for row in intraday_records]
-        intraday_close = [float(row.price) for row in intraday_records]
+    # 3) Calculate global min and max for scaling
+    daily_min = min(daily_low)
+    daily_max = max(daily_high)
+    intraday_min = min(intraday_prices) if intraday_prices else daily_min
+    intraday_max = max(intraday_prices) if intraday_prices else daily_max
+
+    # Combine to get overall min and max
+    overall_min = min(daily_min, intraday_min)
+    overall_max = max(daily_max, intraday_max)
 
     # 4) Create the figure
     fig = go.Figure()
 
-    # --- Add daily candlestick trace ---
+    # Add daily candlestick trace
     fig.add_trace(go.Candlestick(
         x=daily_dates,
         open=daily_open,
@@ -80,35 +62,24 @@ def generate_candlestick_chart(ticker: str):
         name=f"{ticker} (Daily)"
     ))
 
-    # --- Add intraday candlestick or line trace (if intraday data exists) ---
+    # Add intraday line trace (or candlestick if pre-aggregated)
     if intraday_records:
-        # Using Candlestick (pretending we have O/H/L/C):
-        fig.add_trace(go.Candlestick(
+        fig.add_trace(go.Scatter(
             x=intraday_timestamps,
-            open=intraday_open,
-            high=intraday_high,
-            low=intraday_low,
-            close=intraday_close,
-            name=f"{ticker} (Intraday)",
-            increasing_line_color='blue',
-            decreasing_line_color='red',
-            showlegend=True
+            y=intraday_prices,
+            mode='lines',
+            name=f"{ticker} (Intraday)"
         ))
-        # If you only have a single price per record, you can use:
-        # fig.add_trace(go.Scatter(
-        #     x=intraday_timestamps,
-        #     y=[float(r.price) for r in intraday_records],
-        #     mode='lines+markers',
-        #     name=f"{ticker} (Intraday)"
-        # ))
 
-    # 5) Add the range selector with the 1D button (and others)
+    # 5) Update layout with range selector and dynamic scaling
     fig.update_layout(
         title=f"{ticker} - Daily & Intraday",
-        yaxis_title='Price (USD)',
-        xaxis_title='Date/Time',
-        hovermode='x unified',
+        yaxis=dict(
+            title='Price (USD)',
+            range=[overall_min * 0.95, overall_max * 1.05]  # Add a 5% padding
+        ),
         xaxis=dict(
+            title='Date/Time',
             rangeselector=dict(
                 buttons=list([
                     dict(count=1, label="1D", step="day", stepmode="backward"),
@@ -116,12 +87,14 @@ def generate_candlestick_chart(ticker: str):
                     dict(count=1, label="1M", step="month", stepmode="backward"),
                     dict(count=6, label="6M", step="month", stepmode="backward"),
                     dict(count=1, label="1Y", step="year", stepmode="backward"),
-                    dict(count=2, label="2Y", step="year", stepmode="backward"),
+                    dict(count=5, label="5Y", step="year", stepmode="backward"),
                     dict(label="All", step="all")
                 ])
             ),
             type="date"
-        )
+        ),
+        hovermode='x unified'
     )
 
+    # 6) Show the figure
     fig.show()
