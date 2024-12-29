@@ -1,3 +1,13 @@
+"""
+Created on 29/12/2024
+
+@author: Aryan
+
+Filename: generate_stock.py
+
+Relative Path: src/server/controller/generate_stock.py
+"""
+
 from datetime import datetime
 from typing import Dict, Any
 from fastapi import HTTPException

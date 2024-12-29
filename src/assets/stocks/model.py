@@ -1,6 +1,15 @@
-# model.py
+"""
+Created on 29/12/2024
+
+@author: Aryan
+
+Filename: model.py
+
+Relative Path: src/assets/stocks/model.py
+"""
+
 from sqlalchemy import (
-    Column, String, Integer, DECIMAL, ForeignKey, BigInteger, Date
+    Column, DateTime, String, Integer, DECIMAL, ForeignKey, BigInteger, Date
 )
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -167,3 +176,18 @@ class HistoricalData(Base):
 
     # Relationship back to Stock
     stock = relationship("Stock", back_populates="historical_data")
+
+
+class IntradayData(Base):
+    __tablename__ = "intraday_data"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    ticker = Column(String(10), ForeignKey("stocks.ticker"))
+    date = Column(Date, nullable=False)
+    timestamp = Column(DateTime, nullable=False)  # Exact time for the record
+    price = Column(DECIMAL(10, 2), nullable=False)
+    # If you want a volume concept, optional.
+    volume = Column(BigInteger, default=0)
+
+    # Relationship back to the Stock
+    stock = relationship("Stock")

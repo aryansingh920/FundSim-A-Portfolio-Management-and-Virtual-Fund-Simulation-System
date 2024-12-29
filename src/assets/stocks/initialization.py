@@ -1,3 +1,13 @@
+"""
+Created on 29/12/2024
+
+@author: Aryan
+
+Filename: initialization.py
+
+Relative Path: src/assets/stocks/initialization.py
+"""
+
 # initialization.py
 import random
 import string

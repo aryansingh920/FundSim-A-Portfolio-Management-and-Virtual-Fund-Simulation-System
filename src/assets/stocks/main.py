@@ -1,13 +1,16 @@
 # main.py
-from datetime import datetime
+from datetime import datetime, time
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from assets.stocks.model import Base, HistoricalData
 from assets.stocks.initialization import generate_random_stock_data
 from assets.stocks.create_historical_data import create_and_insert_historical_data
 
+# 1) Import your store_intraday_data function and StockDataGenerator
+from assets.stocks.historical_data import StockDataGenerator
 
-def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1), days: int = 365*1):
+
+def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1), days: int = 5):
     # Dictionary to store all generated stock data
     all_stock_data = {}
 
@@ -28,7 +31,7 @@ def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1),
         session.add(market_indicators)
         session.commit()
 
-        # Now automatically generate historical data for this new stock
+        # Generate daily historical data
         ticker = stock.ticker
         start_price = float(price_info.close_price)
         shares_outstanding = stock.shares_outstanding
@@ -37,9 +40,63 @@ def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1),
         annual_dividend = float(
             fundamentals.dividend_yield) if fundamentals.dividend_yield else 5.0
 
-        # Generate and insert historical data
-        create_and_insert_historical_data(session, ticker, start_price, shares_outstanding,
-                                          start_date, days, initial_eps, annual_dividend)
+        create_and_insert_historical_data(
+            session,
+            ticker,
+            start_price,
+            shares_outstanding,
+            start_date,
+            days,
+            initial_eps,
+            annual_dividend
+        )
+
+        # ----------------------------------------------------
+        # NEW: Generate and insert intraday data for the LAST day generated
+        # ----------------------------------------------------
+        all_daily_data = (
+            session.query(HistoricalData)
+            .filter_by(ticker=ticker)
+            .order_by(HistoricalData.date.asc())
+            .all()
+        )
+        if all_daily_data:
+            # Last daily record
+            last_record = all_daily_data[-1]
+
+            # Suppose we define the market open/close for that date
+            trade_date = last_record.date
+            market_open = datetime.combine(trade_date, time(9, 30))
+            market_close = datetime.combine(trade_date, time(16, 0))
+
+            # Use StockDataGenerator just for intraday
+            generator = StockDataGenerator(
+                ticker=ticker,
+                start_price=float(last_record.open_price),
+                shares_outstanding=shares_outstanding,
+                start_date=market_open,
+                days=1,  # We only need this for reference, not real daily gen
+            )
+
+            intraday_records = generator.generate_intraday_data(
+                ticker=ticker,
+                trade_date=trade_date,
+                open_price=float(last_record.open_price),
+                close_price=float(last_record.close_price),
+                day_high=float(last_record.day_high),
+                day_low=float(last_record.day_low),
+                market_open=market_open,
+                market_close=market_close,
+                frequency_seconds=5  # e.g., every 5 seconds
+            )
+
+            # Actually store intraday data in the DB
+            generator.store_intraday_data(session, intraday_records)
+            print(
+                f"Intraday data inserted for {ticker} on {trade_date}"
+                f" with total records: {len(intraday_records)}"
+            )
+        # ----------------------------------------------------
 
         # Collect all data for the current stock
         stock_data = {
@@ -47,7 +104,6 @@ def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1),
                 "ticker": stock.ticker,
                 "company_name": stock.company_name,
                 "sector": stock.sector,
-                # "industry": stock.industry,
                 "shares_outstanding": stock.shares_outstanding,
                 "market_cap": stock.market_cap,
                 "cap_category": stock.cap_category,
@@ -88,7 +144,7 @@ def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1),
             }
         }
 
-        # Fetch historical data
+        # Fetch daily historical data
         historical_records = session.query(
             HistoricalData).filter_by(ticker=ticker).all()
         stock_data["historical_data"] = [
@@ -102,31 +158,28 @@ def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1),
                 "eps": record.eps,
                 "p_e_ratio": record.p_e_ratio,
                 "beta": record.beta
-            } for record in historical_records
+            }
+            for record in historical_records
         ]
+
+        # You could also fetch and attach your IntradayData:
+        # intraday_db_data = session.query(IntradayData).filter_by(ticker=ticker).all()
+        # stock_data["intraday_data"] = [
+        #     {
+        #         "timestamp": row.timestamp,
+        #         "price": row.price,
+        #         "volume": row.volume
+        #     }
+        #     for row in intraday_db_data
+        # ]
 
         # Add to the comprehensive dictionary
         all_stock_data[ticker] = stock_data
 
-    # Print total number of stocks
     print(f"Total stocks generated: {len(all_stock_data)}")
-
     return all_stock_data
 
 
-# Optional: If you want to use it with a main block
 if __name__ == "__main__":
-    # Generate 3 stocks and get their data
-    stock_data = main(number_of_stocks=3)
-
-    # Example of accessing the data
-    for ticker, data in stock_data.items():
-        print(f"\nStock: {ticker}")
-        print(f"Company Name: {data['stock_info']['company_name']}")
-        print(f"Current Price: ${data['price_trading_info']['current_price']}")
-        print(
-            f"Number of Historical Data Points: {len(data['historical_data'])}")
-
-# if __name__ == "__main__":
-#     for _ in range(1):
-#         main()  # Call the main function when the script is run directly
+    # Generate stock data for 3 stocks
+    main(1)
