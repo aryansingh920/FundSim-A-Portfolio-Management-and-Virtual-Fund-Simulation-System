@@ -1,11 +1,20 @@
-# main.py
+"""
+Created on 30/12/2024
+
+@author: Aryan
+
+Filename: main.py
+
+Relative Path: src/assets/stocks/main.py
+"""
+
 from datetime import datetime, time
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from assets.stocks.model import Base, HistoricalData
 from assets.stocks.initialization import generate_random_stock_data
 from assets.stocks.create_historical_data import create_and_insert_historical_data
-
+import pwd
 # 1) Import your store_intraday_data function and StockDataGenerator
 from assets.stocks.historical_data import StockDataGenerator
 
@@ -60,6 +69,7 @@ def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1),
             .order_by(HistoricalData.date.asc())
             .all()
         )
+        print(f"all_daily_data: {all_daily_data}")
         if all_daily_data:
             # Last daily record
             last_record = all_daily_data[-1]
@@ -69,6 +79,9 @@ def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1),
             market_open = datetime.combine(trade_date, time(9, 30))
             market_close = datetime.combine(trade_date, time(16, 0))
 
+            print(f"Generating intraday data for {ticker} on {trade_date}")
+
+            # pwd()
             # Use StockDataGenerator just for intraday
             generator = StockDataGenerator(
                 ticker=ticker,
@@ -87,7 +100,7 @@ def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1),
                 day_low=float(last_record.day_low),
                 market_open=market_open,
                 market_close=market_close,
-                frequency_seconds=5  # e.g., every 5 seconds
+                frequency_seconds=60  # e.g., every 5 seconds
             )
 
             # Actually store intraday data in the DB
