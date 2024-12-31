@@ -1,3 +1,13 @@
+"""
+Created on 31/12/2024
+
+@author: Aryan
+
+Filename: send_visualise.py
+
+Relative Path: src/server/controller/send_visualise.py
+"""
+
 from flask import jsonify
 from assets.stocks.visualize import generate_candlestick_chart
 from assets.stocks.plot_subplot import plot_subplots
