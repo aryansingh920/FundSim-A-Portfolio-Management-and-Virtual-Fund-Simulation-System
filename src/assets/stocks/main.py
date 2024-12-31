@@ -61,7 +61,7 @@ def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1),
         )
 
         # ----------------------------------------------------
-        # NEW: Generate and insert intraday data for the LAST day generated
+        # UPDATED: Generate and insert intraday data for *every* day generated
         # ----------------------------------------------------
         all_daily_data = (
             session.query(HistoricalData)
@@ -69,46 +69,45 @@ def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1),
             .order_by(HistoricalData.date.asc())
             .all()
         )
-        print(f"all_daily_data: {all_daily_data}")
+        print(f"all_daily_data for {ticker}: {all_daily_data}")
+
         if all_daily_data:
-            # Last daily record
-            last_record = all_daily_data[-1]
-
-            # Suppose we define the market open/close for that date
-            trade_date = last_record.date
-            market_open = datetime.combine(trade_date, time(9, 30))
-            market_close = datetime.combine(trade_date, time(16, 0))
-
-            print(f"Generating intraday data for {ticker} on {trade_date}")
-
-            # pwd()
-            # Use StockDataGenerator just for intraday
+            # Instantiate the StockDataGenerator once
             generator = StockDataGenerator(
                 ticker=ticker,
-                start_price=float(last_record.open_price),
+                start_price=float(all_daily_data[0].open_price),
                 shares_outstanding=shares_outstanding,
-                start_date=market_open,
-                days=1,  # We only need this for reference, not real daily gen
+                start_date=start_date,
+                days=days,  # used for daily generation, but we already have daily data
             )
 
-            intraday_records = generator.generate_intraday_data(
-                ticker=ticker,
-                trade_date=trade_date,
-                open_price=float(last_record.open_price),
-                close_price=float(last_record.close_price),
-                day_high=float(last_record.day_high),
-                day_low=float(last_record.day_low),
-                market_open=market_open,
-                market_close=market_close,
-                frequency_seconds=60  # e.g., every 5 seconds
-            )
+            # For each daily record, generate intraday
+            for daily_record in all_daily_data:
+                trade_date = daily_record.date
+                market_open = datetime.combine(trade_date, time(9, 30))
+                market_close = datetime.combine(trade_date, time(16, 0))
 
-            # Actually store intraday data in the DB
-            generator.store_intraday_data(session, intraday_records)
-            print(
-                f"Intraday data inserted for {ticker} on {trade_date}"
-                f" with total records: {len(intraday_records)}"
-            )
+                print(f"Generating intraday data for {ticker} on {trade_date}")
+
+                # For each day, use that day's O/H/L/C in the intraday generation
+                intraday_records = generator.generate_intraday_data(
+                    ticker=ticker,
+                    trade_date=trade_date,
+                    open_price=float(daily_record.open_price),
+                    close_price=float(daily_record.close_price),
+                    day_high=float(daily_record.day_high),
+                    day_low=float(daily_record.day_low),
+                    market_open=market_open,
+                    market_close=market_close,
+                    frequency_seconds=3600  # e.g. every 60 seconds
+                )
+
+                # Store intraday data in the DB
+                generator.store_intraday_data(session, intraday_records)
+                print(
+                    f"Intraday data inserted for {ticker} on {trade_date}"
+                    f" with total records: {len(intraday_records)}"
+                )
         # ----------------------------------------------------
 
         # Collect all data for the current stock
@@ -175,7 +174,7 @@ def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1),
             for record in historical_records
         ]
 
-        # You could also fetch and attach your IntradayData:
+        # Example: fetch intraday data if you want to attach it to the output
         # intraday_db_data = session.query(IntradayData).filter_by(ticker=ticker).all()
         # stock_data["intraday_data"] = [
         #     {
