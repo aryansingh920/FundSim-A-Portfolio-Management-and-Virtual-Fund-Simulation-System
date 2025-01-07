@@ -1,13 +1,14 @@
 #!/bin/zsh
 
 pip3.10 install -r requirements.txt
-python3.10 main_service/main.py
+# python3.10 main_service/main.py
 
 
-kcat -b 127.0.0.1:9092 -t assets -o beginning
+# kcat -b 127.0.0.1:9092 -t assets -o beginning
 
-docker-compose down
-docker-compose up -d
+# docker-compose down
+# docker-compose up -d
 
 
+cd src
 uvicorn main:app --reload --port 1234
