@@ -3,10 +3,11 @@ Created on 07/01/2025
 
 @author: Aryan
 
-Filename: commodity_model.py
+Filename: model.py
 
-Relative Path: src/assets/commodities/commodity_model.py
+Relative Path: src/assets/commodity/model.py
 """
+
 
 from sqlalchemy import (
     Column, DateTime, String, Integer, DECIMAL, ForeignKey, BigInteger, Date, Float, Enum, Text

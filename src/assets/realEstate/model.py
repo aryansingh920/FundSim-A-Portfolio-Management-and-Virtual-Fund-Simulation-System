@@ -1,3 +1,14 @@
+"""
+Created on 07/01/2025
+
+@author: Aryan
+
+Filename: model.py
+
+Relative Path: src/assets/realEstate/model.py
+"""
+
+
 from sqlalchemy import (
     Column, String, Integer, DECIMAL, ForeignKey, Date, DateTime, Text, Boolean, BigInteger
 )

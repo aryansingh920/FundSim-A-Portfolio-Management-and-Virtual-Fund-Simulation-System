@@ -1,3 +1,13 @@
+"""
+Created on 07/01/2025
+
+@author: Aryan
+
+Filename: model.py
+
+Relative Path: src/assets/bonds/model.py
+"""
+
 from sqlalchemy import (
     Column, DateTime, String, Integer, DECIMAL, ForeignKey, BigInteger, Date, Enum, Text
 )
