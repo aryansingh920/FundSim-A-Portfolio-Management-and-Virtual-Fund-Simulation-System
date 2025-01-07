@@ -3,7 +3,7 @@ from fastapi import APIRouter, Path, Query, HTTPException
 from typing import Any, Dict, Optional
 from server.controller.send_visualise import get_candlestick_chart, get_subplot_chart
 from server.controller.generate_stock import stock_data_controller
-
+from server.controller.generate_bond import bond_data_controller
 # Create a FastAPI router
 router = APIRouter()
 
@@ -44,6 +44,44 @@ def generate_stocks(
     return stock_data_controller(
         number_of_stocks=number_of_stocks,
         start_date=parsed_start_date,
+        days=days
+    )
+
+
+@router.get('/generate_bonds', summary="Generate Bond Data", response_model=Dict[str, Any])
+def generate_bonds(
+    number_of_bonds: int = Query(
+        default=3, ge=1, le=20, description="Number of bonds to generate (1-20)"),
+    days: int = Query(default=365, ge=1, le=1825,
+                      description="Number of days of historical data (1-1825)")
+):
+    """
+    Generate bond data with configurable parameters.
+
+    Args:
+        number_of_bonds (int): Number of bonds to generate.
+        start_date (str): Start date for historical data.
+        days (int): Number of days of historical data.
+
+    Returns:
+        Generated bond data.
+    """
+    # Validate and parse start date
+    # try:
+    #     parsed_start_date = datetime.strptime(start_date, '%Y-%m-%d')
+    # except ValueError:
+    # raise HTTPException(
+    #     status_code=400,
+    #     detail={
+    #         "error": "Invalid date format. Use YYYY-MM-DD",
+    #         "example": "2020-01-01"
+    #     }
+    # )
+
+    # Call the bond data controller with parameters
+    return bond_data_controller(
+        number_of_bonds=number_of_bonds,
+        # start_date=parsed_start_date,
         days=days
     )
 
