@@ -99,7 +99,7 @@ def main(number_of_stocks: int = 1, start_date: datetime = datetime(2020, 1, 1),
                     day_low=float(daily_record.day_low),
                     market_open=market_open,
                     market_close=market_close,
-                    frequency_seconds=3600  # e.g. every 60 seconds
+                    frequency_seconds=60  # e.g. every 60 seconds
                 )
 
                 # Store intraday data in the DB
